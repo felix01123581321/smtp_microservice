@@ -1,23 +1,15 @@
 # Email Sender Microservice
 
-A lightweight microservice for sending emails via SMTP. Containerized with Docker and configurable via environment variables.
+A lightweight microservice for sending emails via SMTP. Containerized with Docker and supports multiple email accounts.
 
 ## Quick Start
 
-1. Set environment variables:
-   ```bash
-   export EMAIL_USER=your_email@example.com
-   export EMAIL_PASSWORD=your_password
-   export EMAIL_SMTP_SERVER=smtp.example.com
-   export EMAIL_SMTP_PORT=587
-   ```
-
-2. Run with Docker Compose:
+1. Run with Docker Compose:
    ```bash
    docker compose up --build
    ```
 
-3. Service available at `http://localhost:8001`
+2. Service available at `http://localhost:8001`
 
 ## API Endpoints
 
@@ -35,7 +27,11 @@ Content-Type: application/json
 {
     "recipient": "recipient@example.com",
     "subject": "Email Subject",
-    "content": "Email Content"
+    "content": "Email Content",
+    "smtp_username": "sender@example.com",
+    "smtp_password": "your_password",
+    "smtp_server": "smtp.example.com",
+    "smtp_port": 587
 }
 
 Response: {
@@ -46,6 +42,6 @@ Response: {
 
 ## Error Handling
 
-- 400: Bad Request (invalid email format)
+- 400: Bad Request (invalid email format or missing SMTP credentials)
 - 422: Unprocessable Entity (missing required fields)
 - 500: Internal Server Error (SMTP issues) 

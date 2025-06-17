@@ -6,24 +6,10 @@ from unittest.mock import patch, MagicMock
 class TestEmailSender:
     @pytest.fixture
     def email_sender(self):
-        # Mock environment variables
-        with patch.dict(os.environ, {
-            'EMAIL_USER': 'test@example.com',
-            'EMAIL_PASSWORD': 'test_password',
-            'EMAIL_SMTP_SERVER': 'smtp.example.com',
-            'EMAIL_SMTP_PORT': '587'
-        }):
-            return EmailSender()
-
-    def test_initialization(self, email_sender):
-        """Test if EmailSender initializes with correct credentials"""
-        assert email_sender.smtp_server == 'smtp.example.com'
-        assert email_sender.smtp_port == 587
-        assert email_sender.username == 'test@example.com'
-        assert email_sender.password == 'test_password'
+        return EmailSender()
 
     def test_send_email_success(self, email_sender):
-        """Test successful email sending"""
+        """Test successful email sending with provided credentials"""
         with patch('smtplib.SMTP') as mock_smtp:
             # Setup mock
             mock_smtp_instance = MagicMock()
@@ -33,7 +19,11 @@ class TestEmailSender:
             result = email_sender.send_email(
                 recipient="recipient@example.com",
                 subject="Test Subject",
-                content="Test Content"
+                content="Test Content",
+                smtp_username="test@example.com",
+                smtp_password="test_password",
+                smtp_server="smtp.example.com",
+                smtp_port=587
             )
 
             # Verify SMTP was called correctly
@@ -49,11 +39,22 @@ class TestEmailSender:
             email_sender.send_email(
                 recipient="invalid-email",
                 subject="Test Subject",
-                content="Test Content"
+                content="Test Content",
+                smtp_username="test@example.com",
+                smtp_password="test_password",
+                smtp_server="smtp.example.com",
+                smtp_port=587
             )
 
-    def test_send_email_missing_credentials(self):
-        """Test initialization with missing credentials"""
-        with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError):
-                EmailSender() 
+    def test_send_email_missing_credentials(self, email_sender):
+        """Test email sending with missing credentials"""
+        with pytest.raises(ValueError, match="Missing required SMTP credentials"):
+            email_sender.send_email(
+                recipient="test@example.com",
+                subject="Test Subject",
+                content="Test Content",
+                smtp_username="test@example.com",
+                smtp_password=None,  # Pass None to test missing credentials
+                smtp_server="smtp.example.com",
+                smtp_port=587
+            ) 

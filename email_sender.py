@@ -1,4 +1,3 @@
-import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -6,22 +5,16 @@ import re
 
 class EmailSender:
     def __init__(self):
-        # Get credentials from environment variables
-        self.username = os.getenv('EMAIL_USER')
-        self.password = os.getenv('EMAIL_PASSWORD')
-        self.smtp_server = os.getenv('EMAIL_SMTP_SERVER')
-        self.smtp_port = int(os.getenv('EMAIL_SMTP_PORT', '587'))
-
-        # Validate required environment variables
-        if not all([self.username, self.password, self.smtp_server]):
-            raise ValueError("Missing required email configuration in environment variables")
+        pass
 
     def _validate_email(self, email):
         """Validate email format"""
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return bool(re.match(pattern, email))
 
-    def send_email(self, recipient: str, subject: str, content: str) -> bool:
+    def send_email(self, recipient: str, subject: str, content: str, 
+                  smtp_username: str, smtp_password: str, 
+                  smtp_server: str, smtp_port: int = 587) -> bool:
         """
         Send an email to the specified recipient
         
@@ -29,19 +22,26 @@ class EmailSender:
             recipient (str): Email address of the recipient
             subject (str): Subject of the email
             content (str): Content of the email
+            smtp_username (str): SMTP username/email
+            smtp_password (str): SMTP password
+            smtp_server (str): SMTP server address
+            smtp_port (int): SMTP server port (default: 587)
             
         Returns:
             bool: True if email was sent successfully, False otherwise
             
         Raises:
-            ValueError: If recipient email is invalid
+            ValueError: If recipient email is invalid or SMTP credentials are missing
         """
         if not self._validate_email(recipient):
             raise ValueError("Invalid recipient email address")
+        
+        if not all([smtp_username, smtp_password, smtp_server]):
+            raise ValueError("Missing required SMTP credentials")
 
         # Create message
         message = MIMEMultipart()
-        message['From'] = self.username
+        message['From'] = smtp_username
         message['To'] = recipient
         message['Subject'] = subject
 
@@ -49,9 +49,9 @@ class EmailSender:
         message.attach(MIMEText(content, 'plain'))
 
         # Send email
-        with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
-            server.login(self.username, self.password)
+            server.login(smtp_username, smtp_password)
             server.send_message(message)
 
         return True 

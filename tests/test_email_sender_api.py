@@ -33,7 +33,11 @@ class TestEmailSenderAPI:
             json={
                 "recipient": "test@example.com",
                 "subject": "Test Subject",
-                "content": "Test Content"
+                "content": "Test Content",
+                "smtp_username": "sender@example.com",
+                "smtp_password": "test_password",
+                "smtp_server": "smtp.example.com",
+                "smtp_port": 587
             }
         )
         
@@ -42,7 +46,11 @@ class TestEmailSenderAPI:
         mock_send_email.assert_called_once_with(
             recipient="test@example.com",
             subject="Test Subject",
-            content="Test Content"
+            content="Test Content",
+            smtp_username="sender@example.com",
+            smtp_password="test_password",
+            smtp_server="smtp.example.com",
+            smtp_port=587
         )
 
     @patch('email_sender.EmailSender.send_email')
@@ -53,7 +61,11 @@ class TestEmailSenderAPI:
             json={
                 "recipient": "invalid-email",
                 "subject": "Test Subject",
-                "content": "Test Content"
+                "content": "Test Content",
+                "smtp_username": "sender@example.com",
+                "smtp_password": "test_password",
+                "smtp_server": "smtp.example.com",
+                "smtp_port": 587
             }
         )
         
@@ -65,8 +77,10 @@ class TestEmailSenderAPI:
         response = client.post(
             "/send-email",
             json={
-                "recipient": "test@example.com"
-                # missing subject and content
+                "recipient": "test@example.com",
+                "subject": "Test Subject",
+                "content": "Test Content"
+                # missing SMTP credentials
             }
         )
         

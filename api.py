@@ -22,6 +22,10 @@ class EmailRequest(BaseModel):
     recipient: EmailStr
     subject: str
     content: str
+    smtp_username: str
+    smtp_password: str
+    smtp_server: str
+    smtp_port: int = 587
 
 @app.get("/health")
 async def health_check():
@@ -34,7 +38,7 @@ async def send_email(request: EmailRequest):
     Send an email to the specified recipient
     
     Args:
-        request (EmailRequest): Email request containing recipient, subject, and content
+        request (EmailRequest): Email request containing recipient, subject, content, and SMTP credentials
         
     Returns:
         dict: Status of the email sending operation
@@ -44,7 +48,11 @@ async def send_email(request: EmailRequest):
         email_sender.send_email(
             recipient=request.recipient,
             subject=request.subject,
-            content=request.content
+            content=request.content,
+            smtp_username=request.smtp_username,
+            smtp_password=request.smtp_password,
+            smtp_server=request.smtp_server,
+            smtp_port=request.smtp_port
         )
         return {
             "status": "success",
